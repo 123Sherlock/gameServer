@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option java_package = "cgx.proto";
+option java_outer_classname = "ProtoPlayer";
+
+message Player {
+  int64 id = 1; // Unique ID
+  string name = 2;
+  int32 level = 3;
+}
