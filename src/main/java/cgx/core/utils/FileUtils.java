@@ -9,7 +9,7 @@ import java.util.Properties;
 
 public class FileUtils {
 
-    private static final String USER_DIR = System.getProperty("user.dir");
+    public static final String USER_DIR = System.getProperty("user.dir");
 
     /**
      * 加载配置文件
