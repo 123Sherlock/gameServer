@@ -4,23 +4,23 @@ import cgx.core.database.BaseDb;
 
 public class PlayerDb extends BaseDb {
 
-    private String name;
-
-    private int level;
-
     public String getName() {
-        return name;
+        return _name;
     }
 
     public void setName(String name) {
-        this.name = name;
+        _name = name;
     }
 
     public int getLevel() {
-        return level;
+        return _level;
     }
 
     public void setLevel(int level) {
-        this.level = level;
+        _level = level;
     }
+
+    private String _name;
+
+    private int _level;
 }

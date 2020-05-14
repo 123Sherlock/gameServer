@@ -1,26 +1,32 @@
 package cgx.logic.player;
 
+import cgx.core.utils.CommonMsgWrapper;
+import com.google.protobuf.MessageLite;
 import io.netty.channel.Channel;
 
 public class GamePlayer {
 
-    private Long playerId;
-
-    private Channel channel;
+    public void sendToClient(MessageLite msg) {
+        _channel.writeAndFlush(CommonMsgWrapper.wrap(0, msg));
+    }
 
     public Long getPlayerId() {
-        return playerId;
+        return _playerId;
     }
 
     public void setPlayerId(Long playerId) {
-        this.playerId = playerId;
+        _playerId = playerId;
     }
 
     public Channel getChannel() {
-        return channel;
+        return _channel;
     }
 
     public void setChannel(Channel channel) {
-        this.channel = channel;
+        _channel = channel;
     }
+
+    private Long _playerId;
+
+    private Channel _channel;
 }

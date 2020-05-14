@@ -1,14 +1,20 @@
 package cgx.client;
 
-import io.netty.buffer.ByteBuf;
+import cgx.core.netty.Message;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 
-import java.util.List;
+public class ClientHandler extends ChannelInboundHandlerAdapter {
 
-public class ClientHandler extends ByteToMessageDecoder {
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        Message respondMsg = (Message) msg;
+        System.err.println(String.format("Server msg received[%s]", respondMsg));
+    }
 
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        cause.printStackTrace();
+        ctx.close();
     }
 }

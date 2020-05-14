@@ -1,42 +1,58 @@
 package cgx.core.netty;
 
 import cgx.core.command.Command;
+import cgx.core.utils.CommonMsgWrapper;
 import cgx.logic.define.CommandDefine;
 import cgx.core.command.CommandSet;
-import cgx.core.netty.msg.RequestMsg;
+import cgx.logic.exception.LogicException;
 import cgx.logic.player.GamePlayer;
+import cgx.proto.ProtoCommonMsg;
+import cgx.proto.ProtoError;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 
 public class ServerHandler extends ChannelInboundHandlerAdapter {
 
-    private final AttributeKey<GamePlayer> gamePlayerKey = AttributeKey.valueOf("gamePlayer");
+    private static final AttributeKey<GamePlayer> GAME_PLAYER_KEY = AttributeKey.valueOf("gamePlayer");
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        RequestMsg requestMsg = (RequestMsg) msg;
-        System.err.println(String.format("client msg received:%s", requestMsg));
+        GamePlayer gamePlayer = ctx.channel().attr(GAME_PLAYER_KEY).get();
+        if (gamePlayer == null) {
+            return;
+        }
+
+        Message requestMsg = (Message) msg;
+        System.err.println(String.format("Client msg received[%s]", requestMsg));
 
         int cmdId = requestMsg.getCmd();
         Command command = CommandSet.getCommand(cmdId);
         if (command == null) {
-            System.err.println(String.format("unknow cmdId:%s", cmdId));
+            System.err.println(String.format("Unknown cmdId[%s]", cmdId));
             return;
         }
 
-        if (cmdId == CommandDefine.C1_001) {
-
+        if (cmdId != CommandDefine.C1_001) {
+            ProtoCommonMsg.Msg msgValue = requestMsg.getValue(ProtoCommonMsg.Msg.class);
+            long playerId = msgValue.getPlayerId();
+            if (playerId <= 0) {
+                return;
+            }
+            gamePlayer.setPlayerId(playerId);
         }
-        Attribute<GamePlayer> gamePlayerAttr = ctx.channel().attr(gamePlayerKey);
-        GamePlayer gamePlayer = gamePlayerAttr.get();
         try {
             command.execute(gamePlayer, requestMsg);
+        } catch (LogicException e) {
+            ProtoError.Error errorMsg = ProtoError.Error.newBuilder()
+                .setCode(e.getCode())
+                .build();
+
+            ProtoCommonMsg.Msg errorResponse = CommonMsgWrapper.wrap(cmdId, errorMsg);
+            ctx.writeAndFlush(errorResponse);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        ctx.writeAndFlush(requestMsg);
     }
 
     @Override
@@ -48,6 +64,14 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        System.err.println(String.format("client connected:%s", ctx.channel()));
+        GamePlayer gamePlayer = new GamePlayer();
+        gamePlayer.setChannel(ctx.channel());
+        ctx.channel().attr(GAME_PLAYER_KEY).set(gamePlayer);
+    }
+
+    @Override
+    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+        super.channelRegistered(ctx);
+        System.err.println(String.format("Client connected[%s]", ctx.channel()));
     }
 }

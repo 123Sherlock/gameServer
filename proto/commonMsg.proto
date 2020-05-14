@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option java_package = "cgx.proto";
+option java_outer_classname = "ProtoCommonMsg";
+
+message Msg {
+  int32 cmd = 1;
+  string msgType = 2;
+  bytes msg = 3;
+  int64 time = 4;
+  int64 playerId = 5;
+}

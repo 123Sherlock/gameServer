@@ -21,9 +21,9 @@ public class MysqlService {
      */
     public static void initMysqlServer(Properties p) {
         dDataSrc = new DruidDataSource();
-        dDataSrc.setDriverClassName("com.mysql.jdbc.Driver");
-        dDataSrc.setUrl(String.format("jdbc:mysql://%s/?useUnicode=true&characterEncoding=UTF-8",
-                p.getProperty("mysql_ip")));
+        dDataSrc.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        dDataSrc.setUrl(String.format("jdbc:mysql://%s/%s?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT",
+                p.getProperty("mysql_ip"), p.getProperty("mysql_db")));
         dDataSrc.setUsername(p.getProperty("mysql_user"));
         dDataSrc.setPassword(p.getProperty("mysql_password"));
         dDataSrc.setMaxActive(30); // 最大负载20个，10个用来查询

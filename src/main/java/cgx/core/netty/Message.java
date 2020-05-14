@@ -1,13 +1,12 @@
-package cgx.core.netty.msg;
+package cgx.core.netty;
+
+import com.google.protobuf.MessageLite;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.Serializable;
 
 public class Message implements Serializable {
-
-    /**
-     * 模块ID
-     */
-    private int module;
 
     /**
      * 命令ID
@@ -22,15 +21,7 @@ public class Message implements Serializable {
     /**
      * 请求/响应的消息
      */
-    private Object value;
-
-    public int getModule() {
-        return module;
-    }
-
-    public void setModule(int module) {
-        this.module = module;
-    }
+    private MessageLite value;
 
     public int getCmd() {
         return cmd;
@@ -48,17 +39,21 @@ public class Message implements Serializable {
         this.time = time;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> T getValue() {
+    @SuppressWarnings({"unchecked", "unused"})
+    public <T extends MessageLite> T getValue(Class<T> msgType) {
         return (T) value;
     }
 
-    public void setValue(Object value) {
+    public MessageLite getValue() {
+        return value;
+    }
+
+    public void setValue(MessageLite value) {
         this.value = value;
     }
 
     @Override
     public String toString() {
-        return "Message{module=" + module + ", cmd=" + cmd + ", time=" + time + '}';
+        return ReflectionToStringBuilder.toString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

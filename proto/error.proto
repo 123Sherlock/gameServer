@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+option java_package = "cgx.proto";
+option java_outer_classname = "ProtoError";
+
+message Error {
+  int32 code = 1;
+}
