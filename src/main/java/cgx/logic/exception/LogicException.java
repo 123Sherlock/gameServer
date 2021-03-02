@@ -1,6 +1,6 @@
 package cgx.logic.exception;
 
-public class LogicException extends Exception {
+public class LogicException extends RuntimeException {
 
     public LogicException(int code) {
         _code = code;

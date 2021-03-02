@@ -16,7 +16,7 @@ public class PlayerService {
         return onlinePlayerMap.get(id);
     }
 
-    public GamePlayer addOnlinePlayer(GamePlayer gamePlayer) throws LogicException {
+    public GamePlayer addOnlinePlayer(GamePlayer gamePlayer) {
         Long playerId = gamePlayer.getPlayerId();
         if (playerId == null || playerId <= 0) {
             throw new LogicException(ErrorCodeDefine.E1_001);

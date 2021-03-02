@@ -1,10 +1,10 @@
 package cgx.logic.login.manager;
 
-import cgx.core.database.DbGetOrCreator;
 import cgx.logic.define.ErrorCodeDefine;
 import cgx.logic.exception.LogicException;
 import cgx.logic.player.GamePlayer;
 import cgx.logic.player.PlayerDb;
+import cgx.logic.player.PlayerDbGetter;
 import cgx.logic.player.PlayerService;
 import cgx.proto.ProtoLogin;
 import cgx.proto.ProtoPlayer;
@@ -14,12 +14,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class LoginManager {
 
-    public ProtoLogin.Login.S2C login(GamePlayer gamePlayer, Long playerId) throws LogicException {
+    public ProtoLogin.Login.S2C login(GamePlayer gamePlayer, Long playerId) {
         if (playerService.isOnline(playerId)) {
             throw new LogicException(ErrorCodeDefine.E2_001);
         }
 
-        PlayerDb playerDb = dbGetOrCreator.getDb(PlayerDb.class, playerId);
+        PlayerDb playerDb = playerDbGetter.get(playerId);
         gamePlayer.setPlayerId(playerDb.getId());
 
         ProtoPlayer.Player playerP = ProtoPlayer.Player.newBuilder()
@@ -42,5 +42,5 @@ public class LoginManager {
     private PlayerService playerService;
 
     @Autowired
-    private DbGetOrCreator dbGetOrCreator;
+    private PlayerDbGetter playerDbGetter;
 }

@@ -4,6 +4,9 @@ import com.google.common.cache.LoadingCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class DbGetOrCreator {
 
@@ -21,5 +24,11 @@ public class DbGetOrCreator {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public <T extends BaseDb> List<T> getDbList(Class<T> dbClass, List<Long> idList) {
+        return idList.stream()
+            .map((id) -> getDb(dbClass, id))
+            .collect(Collectors.toList());
     }
 }

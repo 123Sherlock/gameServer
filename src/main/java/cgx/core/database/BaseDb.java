@@ -13,6 +13,11 @@ public class BaseDb {
         _id = id;
     }
 
+    //TODO: 加入保存队列等待入库
+    public void save() {
+
+    }
+
     protected Long _id;
 
     @Override

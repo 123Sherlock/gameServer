@@ -29,10 +29,22 @@ public class DataConfigManager {
     @Autowired
     private ApplicationContext _applicationContext;
 
+    /**
+     * 获取一条策划配置
+     * @param configType 配置类型（表名）
+     * @param id 该配置表的唯一id
+     */
     public <T extends DataConfig> T get(Class<T> configType, Integer id) {
+        if (configType == null || id == null) {
+            return null;
+        }
         return getConfigMap(configType).get(id);
     }
 
+    /**
+     * 获取一张表的所有配置
+     * @param configType 配置类型（表名）
+     */
     public <T extends DataConfig> List<T> getAll(Class<? extends T> configType) {
         return ImmutableList.copyOf(getConfigMap(configType).values());
     }
