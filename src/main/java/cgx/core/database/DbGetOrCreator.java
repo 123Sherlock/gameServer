@@ -28,7 +28,7 @@ public class DbGetOrCreator {
 
     public <T extends BaseDb> List<T> getDbList(Class<T> dbClass, List<Long> idList) {
         return idList.stream()
-            .map((id) -> getDb(dbClass, id))
+            .map(id -> getDb(dbClass, id))
             .collect(Collectors.toList());
     }
 }

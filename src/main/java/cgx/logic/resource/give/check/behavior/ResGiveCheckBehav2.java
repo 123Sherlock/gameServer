@@ -70,10 +70,10 @@ public class ResGiveCheckBehav2 implements ResGiveCheckBehavior {
         // 所有可堆叠的格子
         List<BagItemDb> bagItemDbs = bagDb.getGridMap().values().stream()
             .map(BagGridDb::getBagItemDb)
-            .filter((i) -> Objects.equals(i.getConfigId(), configId))
-            .filter((i) -> i.getExtra() == null) // 暂定无额外信息的才可堆叠
+            .filter(i -> Objects.equals(i.getConfigId(), configId))
+            .filter(i -> i.getExtra() == null) // 暂定无额外信息的才可堆叠
             .filter(bagItemManager::isPermenent) // 暂定永久的才可堆叠
-            .filter((i) -> i.getAmount() < pileLimit)
+            .filter(i -> i.getAmount() < pileLimit)
             .collect(Collectors.toList());
 
         // 开始堆叠

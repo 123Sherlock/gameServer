@@ -1,5 +1,6 @@
 package cgx.core.netty;
 
+import cgx.core.command.CmdCtx;
 import cgx.core.command.Command;
 import cgx.core.utils.CommonMsgWrapper;
 import cgx.logic.define.CommandDefine;
@@ -42,7 +43,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
             gamePlayer.setPlayerId(playerId);
         }
         try {
-            command.execute(gamePlayer, requestMsg);
+            command.execute(new CmdCtx(gamePlayer, requestMsg));
         } catch (LogicException e) {
             ProtoError.Error errorMsg = ProtoError.Error.newBuilder()
                 .setCode(e.getCode())

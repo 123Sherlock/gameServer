@@ -23,7 +23,7 @@ public class BagManager {
     public int findFirstEmptyIndex(BagDb bagDb) {
         Map<Integer, BagGridDb> gridMap = bagDb.getGridMap();
         return IntStream.range(0, bagDb.getGridAmount())
-            .filter((i) -> !gridMap.containsKey(i))
+            .filter(i -> !gridMap.containsKey(i))
             .findFirst()
             .orElseThrow(() -> new LogicException(ErrorCodeDefine.E3_004));
     }

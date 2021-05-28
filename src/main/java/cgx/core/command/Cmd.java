@@ -12,5 +12,5 @@ import java.lang.annotation.Target;
 @Component
 public @interface Cmd {
 
-    int cmdId();
+    int value();
 }

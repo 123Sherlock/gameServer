@@ -15,7 +15,7 @@ public class CommandSet {
         try {
             commandMap = beanCollector.collectBeanMap(Command.class, Cmd.class, cmd -> {
                 Cmd anno = cmd.getClass().getAnnotation(Cmd.class);
-                return anno.cmdId();
+                return anno.value();
             });
         } catch (RuntimeException e) {
             e.printStackTrace();

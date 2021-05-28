@@ -20,12 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * 资源管理器
@@ -44,9 +42,9 @@ public class ResourceManager {
     }
 
     private ResGiveCheckResult checkGiveImpl(GamePlayer gamePlayer,
-        Map<Integer, Map<Integer, List<ResourceWrap>>> resourceMap, ResourceTrack track) {
+        Map<Integer, List<ResourceWrap>> resourceMap, ResourceTrack track) {
         boolean ungivableRes = resourceMap.keySet().stream()
-            .anyMatch((t) -> resGiveCheckBehavMap.getBehavior(t) == null); // 找不到对应类型的处理器
+            .anyMatch(t -> resGiveCheckBehavMap.getBehavior(t) == null); // 找不到对应类型的处理器
         if (ungivableRes) {
             throw new LogicException(ErrorCodeDefine.E3_001);
         }
@@ -54,19 +52,21 @@ public class ResourceManager {
         List<ResCheckResultCode> resultCodeList = new ArrayList<>(resourceMap.size());
         List<ResourceWrap> givableResList = new ArrayList<>(resourceMap.size());
 
-        for (Map.Entry<Integer, Map<Integer, List<ResourceWrap>>> entry : resourceMap.entrySet()) {
-            Map<Integer, List<ResourceWrap>> resourceSubMap = entry.getValue();
-            List<ResourceWrap> resources = resourceSubMap.values().stream()
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
-
+        for (Map.Entry<Integer, List<ResourceWrap>> entry : resourceMap.entrySet()) {
             // 资源大类检查
             ResGiveCheckBehavior checkBehavior = resGiveCheckBehavMap.getBehavior(entry.getKey());
-            ResGiveCheckContext checkCtx = new ResGiveCheckContext(gamePlayer.getPlayerId(), resources, track);
+            ResGiveCheckContext checkCtx = new ResGiveCheckContext(gamePlayer.getPlayerId(), entry.getValue(), track);
             checkBehavior.behave(checkCtx);
 
             List<ResCheckResultCode> resultCodes = checkCtx.getResultCodes();
             List<ResourceWrap> givableResources = checkCtx.getGivableResources();
+
+            // 把大类检查的结果再按小类分类
+            Map<Integer, List<ResourceWrap>> resourceSubMap = new HashMap<>();
+            for (ResourceWrap resource : givableResources) {
+                List<ResourceWrap> subResources = resourceSubMap.computeIfAbsent(resource.getSubType(), ArrayList::new);
+                subResources.add(resource);
+            }
 
             // 有些小类需要特别检查
             subCheck(gamePlayer, resourceSubMap, track, resultCodes, givableResources);
@@ -98,7 +98,7 @@ public class ResourceManager {
     private ResGiveResult give(GamePlayer gamePlayer, List<ResourceWrap> resourceList, ResourceTrack track) {
         boolean ungivableRes = resourceList.stream()
             .map(ResourceWrap::getType)
-            .anyMatch((t) -> resGiveBehavMap.getBehavior(t) == null); // 找不到对应类型的处理器
+            .anyMatch(t -> resGiveBehavMap.getBehavior(t) == null); // 找不到对应类型的处理器
         if (ungivableRes) {
             throw new LogicException(ErrorCodeDefine.E3_001);
         }
@@ -123,7 +123,7 @@ public class ResourceManager {
         ResGiveCheckResult checkResult = checkGiveImpl(gamePlayer, mergeResource(resourceList), track);
         boolean checkFail = checkResult.getResultCodeList().stream()
             .map(ResCheckResultCode::getErrorCode)
-            .anyMatch((c) -> c != ErrorCodeDefine.SUCCESS);
+            .anyMatch(c -> c != ErrorCodeDefine.SUCCESS);
         if (checkFail) {
             return new ResGiveResult(checkResult.getResultCodeList(), null);
         }
@@ -133,9 +133,9 @@ public class ResourceManager {
     /**
      * 合并整理资源
      */
-    private Map<Integer, Map<Integer, List<ResourceWrap>>> mergeResource(List<ResourceWrap> resourceList) {
-        // Map<大类, Map<小类, List<资源>>>
-        Map<Integer, Map<Integer, List<ResourceWrap>>> typeMap = new HashMap<>(resourceList.size());
+    private Map<Integer, List<ResourceWrap>> mergeResource(List<ResourceWrap> resourceList) {
+        // Map<大类, List<资源>>
+        Map<Integer, List<ResourceWrap>> typeMap = new HashMap<>(resourceList.size());
 
         for (ResourceWrap resource : resourceList) {
             Integer type = resource.getType();
@@ -143,27 +143,18 @@ public class ResourceManager {
             Integer configId = resource.getConfigId();
             long duration = resource.getDuration();
 
-            Map<Integer, List<ResourceWrap>> subTypeMap = typeMap.get(type);
-            if (subTypeMap == null) {
-                List<ResourceWrap> newResourceList = new ArrayList<>();
-                newResourceList.add(resource);
+            List<ResourceWrap> resourceWraps = typeMap.computeIfAbsent(type, ArrayList::new);
+            Optional<ResourceWrap> resourceOpt = resourceWraps.stream()
+                .filter(r -> r.getSubType().equals(subType))
+                .filter(r -> r.getConfigId().equals(configId))
+                .filter(r -> r.getDuration() == duration)
+                .findAny();
 
-                Map<Integer, List<ResourceWrap>> newSubTypeMap = new HashMap<>();
-                newSubTypeMap.put(subType, newResourceList);
-                typeMap.put(type, newSubTypeMap);
+            if (resourceOpt.isPresent()) {
+                ResourceWrap resourceWrap = resourceOpt.get();
+                resourceWrap.setAmount(resourceWrap.getAmount() + resource.getAmount());
             } else {
-                List<ResourceWrap> resourceWraps = subTypeMap.computeIfAbsent(subType, ArrayList::new);
-                Optional<ResourceWrap> resourceOpt = resourceWraps.stream()
-                    .filter((r) -> r.getConfigId().equals(configId))
-                    .filter((r) -> r.getDuration() == duration)
-                    .findAny();
-
-                if (resourceOpt.isPresent()) {
-                    ResourceWrap resourceWrap = resourceOpt.get();
-                    resourceWrap.setAmount(resourceWrap.getAmount() + resource.getAmount());
-                } else {
-                    resourceWraps.add(resource);
-                }
+                resourceWraps.add(resource);
             }
         }
         return typeMap;

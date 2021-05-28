@@ -46,7 +46,7 @@ public class RandTable<K, V> {
         }
 
         double rateSum = valMap.values().stream()
-                .mapToDouble((o) -> o._rate)
+                .mapToDouble(o -> o._rate)
                 .sum();
 
         double randVal = ThreadLocalRandom.current().nextDouble(rateSum);

@@ -39,10 +39,10 @@ public class ResGiveBehav2 implements ResGiveBehavior {
         // 寻找能堆叠的格子
         Optional<BagItemDb> pilableItemDbOpt = gridMap.values().stream()
             .map(BagGridDb::getBagItemDb)
-            .filter((i) -> Objects.equals(i.getConfigId(), configId))
-            .filter((i) -> i.getExtra() == null)
+            .filter(i -> Objects.equals(i.getConfigId(), configId))
+            .filter(i -> i.getExtra() == null)
             .filter(bagItemManager::isPermenent)
-            .filter((i) -> i.getAmount() + amount <= pileLimit)
+            .filter(i -> i.getAmount() + amount <= pileLimit)
             .findFirst();
 
         if (pilableItemDbOpt.isPresent()) {

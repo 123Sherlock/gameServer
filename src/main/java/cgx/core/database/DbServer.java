@@ -22,7 +22,7 @@ public class DbServer {
 
     public <T extends BaseDb> LoadingCache<Long, T> getLoadingCache(Class<T> dbClass) {
         String dbName = dbClass.getSimpleName();
-        return (LoadingCache<Long, T>) loadingCacheMap.computeIfAbsent(dbName, (k) -> createLoadingCache((Class<BaseDb>) dbClass));
+        return (LoadingCache<Long, T>) loadingCacheMap.computeIfAbsent(dbName, k -> createLoadingCache((Class<BaseDb>) dbClass));
     }
 
     public <T extends BaseDb> LoadingCache<Long, T> createLoadingCache(Class<T> dbClass) {

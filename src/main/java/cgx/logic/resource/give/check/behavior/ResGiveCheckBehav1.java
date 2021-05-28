@@ -15,7 +15,7 @@ public class ResGiveCheckBehav1 implements ResGiveCheckBehavior {
     @Override
     public void behave(ResGiveCheckContext ctx) {
         ctx.getResources().stream()
-            .map((r) -> new ResCheckResultCode(r, ErrorCodeDefine.SUCCESS))
+            .map(r -> new ResCheckResultCode(r, ErrorCodeDefine.SUCCESS))
             .forEach(ctx.getResultCodes()::add);
         ctx.getGivableResources().addAll(ctx.getResources());
     }
