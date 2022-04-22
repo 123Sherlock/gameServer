@@ -1,4 +1,4 @@
-package misc;
+package mytest.misc;
 
 public class Test {
 

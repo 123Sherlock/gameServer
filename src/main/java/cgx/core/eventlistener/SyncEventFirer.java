@@ -8,7 +8,6 @@ import java.util.Set;
 /**
  * 同步事件发射器，事件发出后立即执行监听器
  */
-@Component
 public class SyncEventFirer<E> {
 
     /**
