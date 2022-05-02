@@ -8,10 +8,13 @@ import com.google.common.cache.LoadingCache;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Component
 public class DbServer {
@@ -61,5 +64,35 @@ public class DbServer {
         }
 
         private final Class<T> _dbClass;
+    }
+
+    //TODO: 改用缓存
+    public <T extends BaseDb> List<T> selectAllByTable(Class<T> table) {
+        String dbName = table.getSimpleName().toLowerCase(Locale.ENGLISH);
+        String sql = String.format("SELECT `data` FROM `%s`", dbName);
+        List<String> result = MysqlService.queryList(sql);
+
+        try {
+            return result.stream()
+                .map(JSON::parseObject)
+                .map(JSONObject::getInnerMap)
+                .map(r -> populateDb(table, r))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toUnmodifiableList());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
+
+    private <T extends BaseDb> T populateDb(Class<T> dbType, Map<String, Object> properties) {
+        try {
+            T newDb = dbType.getConstructor().newInstance();
+            BeanUtils.populate(newDb, properties);
+            return newDb;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

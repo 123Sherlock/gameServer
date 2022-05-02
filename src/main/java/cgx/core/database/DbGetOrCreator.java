@@ -10,9 +10,6 @@ import java.util.stream.Collectors;
 @Component
 public class DbGetOrCreator {
 
-    @Autowired
-    private DbServer dbServer;
-
     public <T extends BaseDb> T getDb(Class<T> dbClass, Long id) {
         if (id == null || id <= 0) {
             return null;
@@ -31,4 +28,11 @@ public class DbGetOrCreator {
             .map(id -> getDb(dbClass, id))
             .collect(Collectors.toList());
     }
+
+    public <T extends BaseDb> List<T> getAllDbList(Class<T> dbClass) {
+        return dbServer.selectAllByTable(dbClass);
+    }
+
+    @Autowired
+    private DbServer dbServer;
 }
