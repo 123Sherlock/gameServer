@@ -24,6 +24,10 @@ public class TimeTool {
         return System.currentTimeMillis();
     }
 
+    public LocalDateTime now() {
+        return LocalDateTime.now();
+    }
+
     public LocalDateTime milliToLocalDateTime(long milli) {
         return Instant.ofEpochMilli(milli).atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
